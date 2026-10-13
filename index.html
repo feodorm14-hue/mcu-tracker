@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MCU Трекер</title>
 <meta name="description" content="Все фильмы киновселенной Marvel: отмечай просмотренные, смотри по выходу или по хронологии, ссылки на Кинопоиск.">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -56,6 +58,8 @@ li.film.seen .t{text-decoration:line-through;text-decoration-color:var(--done)}
 .tag.soon{color:var(--soon);font-weight:600}
 a.kp{font:600 12.5px Inter,sans-serif;color:var(--accent-ink);background:var(--accent);text-decoration:none;padding:7px 10px;border-radius:9px;white-space:nowrap}
 a.kp:hover{filter:brightness(1.1)}
+.links{display:flex;gap:6px;flex-wrap:wrap}
+a.kp.jw{background:var(--chip);color:var(--ink);border:1px solid var(--line)}
 .empty{color:var(--mute);text-align:center;padding:30px}
 details{margin-top:34px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
 summary{cursor:pointer;font-weight:600}
@@ -67,7 +71,7 @@ footer{margin-top:18px;font-size:12px;color:var(--mute);text-align:center}
   .num{display:none}
   .cb{grid-area:cb;align-self:start}
   .info{grid-area:info}
-  a.kp{grid-area:kp;justify-self:start}
+  .links{grid-area:kp;justify-self:start}
 }
 </style>
 </head>
@@ -118,7 +122,7 @@ footer{margin-top:18px;font-size:12px;color:var(--mute);text-align:center}
       <li>Хронология: <a href="https://www.tomsguide.com/news/marvel-movies-in-order">Tom's Guide (обновлено 31.08.2026)</a>, <a href="https://www.techadvisor.com/article/731808/how-to-watch-marvel-movies-and-series-in-order.html">Tech Advisor (официальная хронология из книги «Marvel Studios: The First Ten Years»)</a>, <a href="https://www.mentalfloss.com/entertainment/movies/watch-marvel-movies-in-order">Mental Floss</a>, <a href="https://www.svitstyle.com.ua/ru/filmy-marvel-hronologiya-povnyj-posibnyk-2026/">SvitStyle</a></li>
       <li>«Человек-паук: Совершенно новый день» — 38-й фильм MCU: <a href="https://itc.ua/articles/retsenzyya-na-fylm-chelovek-pauk-absolyutno-novyj-den-spider-man-brand-new-day/amp/">ITC.ua</a>, <a href="https://ukranews.com/ru/news/1166345-chelovek-pauk-sovershenno-novyj-den-sobral-pochti-milliard-za-pervyj-uik-end-vtoroj-luchshij-start">УНН</a>, <a href="https://www.afisha.uz/ru/cinema/2026/03/18/spider-man-brand-new-day-trailer">Afisha.uz</a>, <a href="https://abcnews.com/culture/story/spider-man-brand-new-day-biggest-opening-weekend-135310254">ABC News</a></li>
       <li>«Мстители: Судный день» — 18.12.2026: <a href="https://movies.disney.com/avengers-doomsday">Disney</a>, <a href="https://www.dexerto.com/tv-movies/avengers-doomsday-release-date-cast-plot-more-1949725">Dexerto</a></li>
-      <li>Ссылки на фильмы — <a href="https://www.kinopoisk.ru">Кинопоиск</a> (страница каждого фильма)</li>
+      <li>Ссылки на фильмы — <a href="https://www.kinopoisk.ru">Кинопоиск</a> (страница каждого фильма) и <a href="https://www.justwatch.com/ru">JustWatch</a> (где посмотреть легально, в том числе бесплатно с рекламой)</li>
     </ul>
   </details>
   <footer>Отметки хранятся в этом браузере. Данные актуальны на 13.10.2026.</footer>
@@ -192,7 +196,10 @@ function render(){
         <div class="t">${f.t}</div>
         <div class="meta"><span>${f.en}</span><span class="tag">${f.y}</span><span class="tag">Фаза ${f.p}</span>${prefs.order==="chrono"?`<span class="tag">события: ${f.ev}</span>`:""}${f.soon?`<span class="tag soon">${f.soon}</span>`:""}</div>
       </div>
-      <a class="kp" href="https://www.kinopoisk.ru/film/${f.kp}/" target="_blank" rel="noopener">Кинопоиск ↗</a>
+      <div class="links">
+        <a class="kp" href="https://www.kinopoisk.ru/film/${f.kp}/" target="_blank" rel="noopener">Кинопоиск ↗</a>
+        <a class="kp jw" href="https://www.justwatch.com/ru/поиск?q=${encodeURIComponent(f.en)}" target="_blank" rel="noopener" title="Где смотреть: все сервисы и цены">Где смотреть ↗</a>
+      </div>
     </li>`).join(""):`<li class="empty">Здесь пусто</li>`;
   document.querySelectorAll(".seg button").forEach(b=>b.classList.toggle("on",b.dataset.order===prefs.order));
   $("#phase").value=prefs.phase; $("#show").value=prefs.show;
