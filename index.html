@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCU Трекер</title>
+<meta name="description" content="Все фильмы киновселенной Marvel: отмечай просмотренные, смотри по выходу или по хронологии, ссылки на Кинопоиск.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f1ec;--card:#ffffff;--ink:#17141a;--mute:#6b6470;--line:#e2dcd4;
+  --accent:#c8102e;--accent-ink:#fff;--done:#1f8a4c;--chip:#efe9e1;--soon:#b7791f;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f0d12;--card:#19161d;--ink:#f1edf4;--mute:#9a93a1;--line:#2c2731;
+  --accent:#e2263f;--accent-ink:#fff;--done:#3fbf74;--chip:#241f29;--soon:#e0a640;
+}}
+:root[data-theme="dark"]{
+  --bg:#0f0d12;--card:#19161d;--ink:#f1edf4;--mute:#9a93a1;--line:#2c2731;
+  --accent:#e2263f;--accent-ink:#fff;--done:#3fbf74;--chip:#241f29;--soon:#e0a640;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding:28px 16px 60px}
+header h1{font:700 clamp(30px,6vw,46px)/1 Oswald,sans-serif;letter-spacing:.5px;text-transform:uppercase;margin:0}
+header h1 span{color:var(--accent)}
+header p{color:var(--mute);margin:8px 0 0}
+.progress{margin:22px 0 18px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.progress .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.big{font:700 34px/1 Oswald,sans-serif}
+.big small{font-size:18px;color:var(--mute)}
+.bar{height:10px;background:var(--chip);border-radius:99px;overflow:hidden;margin-top:12px}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .35s}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:center}
+.seg{display:inline-flex;background:var(--chip);border-radius:10px;padding:3px}
+.seg button{border:0;background:none;color:var(--mute);font:600 13px Inter,sans-serif;padding:8px 12px;border-radius:8px;cursor:pointer}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+select,.btn{font:600 13px Inter,sans-serif;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 10px;cursor:pointer}
+.btn.ghost{color:var(--mute)}
+.spacer{flex:1}
+.note{font-size:13px;color:var(--mute);margin:0 0 14px;background:var(--card);border-left:3px solid var(--accent);padding:10px 12px;border-radius:0 10px 10px 0}
+ol{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+li.film{display:grid;grid-template-columns:auto 34px 1fr auto;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;transition:opacity .2s}
+li.film.seen{opacity:.62}
+li.film.seen .t{text-decoration:line-through;text-decoration-color:var(--done)}
+.num{font:700 18px Oswald,sans-serif;color:var(--mute);width:26px;text-align:right}
+.cb{appearance:none;width:30px;height:30px;border:2px solid var(--line);border-radius:9px;cursor:pointer;display:grid;place-items:center;margin:0;background:var(--bg)}
+.cb:checked{background:var(--done);border-color:var(--done)}
+.cb:checked::after{content:"";width:8px;height:14px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.cb:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.t{font-weight:600;font-size:16px}
+.meta{font-size:12.5px;color:var(--mute);margin-top:2px;display:flex;flex-wrap:wrap;gap:4px 10px}
+.tag{background:var(--chip);border-radius:6px;padding:1px 7px}
+.tag.soon{color:var(--soon);font-weight:600}
+a.kp{font:600 12.5px Inter,sans-serif;color:var(--accent-ink);background:var(--accent);text-decoration:none;padding:7px 10px;border-radius:9px;white-space:nowrap}
+a.kp:hover{filter:brightness(1.1)}
+.empty{color:var(--mute);text-align:center;padding:30px}
+details{margin-top:34px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+summary{cursor:pointer;font-weight:600}
+details ul{padding-left:18px;margin:10px 0 4px;font-size:13.5px}
+details a{color:var(--accent)}
+footer{margin-top:18px;font-size:12px;color:var(--mute);text-align:center}
+@media (max-width:560px){
+  li.film{grid-template-columns:30px 1fr;grid-template-areas:"cb info" "cb kp";row-gap:8px}
+  .num{display:none}
+  .cb{grid-area:cb;align-self:start}
+  .info{grid-area:info}
+  a.kp{grid-area:kp;justify-self:start}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Киновселенная <span>Marvel</span></h1>
+    <p>Все фильмы MCU: отмечай просмотренные, переключай порядок, открывай на Кинопоиске.</p>
+  </header>
+
+  <section class="progress" aria-live="polite">
+    <div class="row">
+      <div class="big" id="count">0 <small>/ 0 просмотрено</small></div>
+      <div id="left" style="color:var(--mute)"></div>
+    </div>
+    <div class="bar"><i id="bar"></i></div>
+  </section>
+
+  <div class="controls">
+    <div class="seg" role="tablist" aria-label="Порядок">
+      <button data-order="release" class="on">По выходу</button>
+      <button data-order="chrono">По хронологии</button>
+    </div>
+    <select id="phase" aria-label="Фаза">
+      <option value="all">Все фазы</option>
+      <option value="1">Фаза 1</option><option value="2">Фаза 2</option>
+      <option value="3">Фаза 3</option><option value="4">Фаза 4</option>
+      <option value="5">Фаза 5</option><option value="6">Фаза 6</option>
+    </select>
+    <select id="show" aria-label="Показать">
+      <option value="all">Все</option>
+      <option value="todo">Не смотрел</option>
+      <option value="seen">Посмотрел</option>
+    </select>
+    <span class="spacer"></span>
+    <button class="btn ghost" id="theme" title="Тема">◐</button>
+    <button class="btn ghost" id="reset">Сбросить</button>
+  </div>
+
+  <p class="note" id="chronoNote" hidden>Хронология — порядок событий внутри вселенной. Источники местами расходятся (особенно после «Финала»), здесь — сводный вариант. Метка «события» — когда происходит действие.</p>
+
+  <ol id="list"></ol>
+
+  <details>
+    <summary>Источники</summary>
+    <ul>
+      <li>Список и фазы: <a href="https://znanierussia.ru/articles/Кинематографическая_вселенная_Marvel">Знание (Кинематографическая вселенная Marvel)</a>, <a href="https://imfdb.org/wiki/MCU">IMFDB: MCU</a>, <a href="https://en.vikidia.org/wiki/Marvel_Cinematic_Universe">Vikidia: MCU</a>, <a href="https://www.thepopverse.com/marvel-movies-in-order-mcu-cinematic-universe-studios-chronological-release">Popverse</a></li>
+      <li>Хронология: <a href="https://www.tomsguide.com/news/marvel-movies-in-order">Tom's Guide (обновлено 31.08.2026)</a>, <a href="https://www.techadvisor.com/article/731808/how-to-watch-marvel-movies-and-series-in-order.html">Tech Advisor (официальная хронология из книги «Marvel Studios: The First Ten Years»)</a>, <a href="https://www.mentalfloss.com/entertainment/movies/watch-marvel-movies-in-order">Mental Floss</a>, <a href="https://www.svitstyle.com.ua/ru/filmy-marvel-hronologiya-povnyj-posibnyk-2026/">SvitStyle</a></li>
+      <li>«Человек-паук: Совершенно новый день» — 38-й фильм MCU: <a href="https://itc.ua/articles/retsenzyya-na-fylm-chelovek-pauk-absolyutno-novyj-den-spider-man-brand-new-day/amp/">ITC.ua</a>, <a href="https://ukranews.com/ru/news/1166345-chelovek-pauk-sovershenno-novyj-den-sobral-pochti-milliard-za-pervyj-uik-end-vtoroj-luchshij-start">УНН</a>, <a href="https://www.afisha.uz/ru/cinema/2026/03/18/spider-man-brand-new-day-trailer">Afisha.uz</a>, <a href="https://abcnews.com/culture/story/spider-man-brand-new-day-biggest-opening-weekend-135310254">ABC News</a></li>
+      <li>«Мстители: Судный день» — 18.12.2026: <a href="https://movies.disney.com/avengers-doomsday">Disney</a>, <a href="https://www.dexerto.com/tv-movies/avengers-doomsday-release-date-cast-plot-more-1949725">Dexerto</a></li>
+      <li>Ссылки на фильмы — <a href="https://www.kinopoisk.ru">Кинопоиск</a> (страница каждого фильма)</li>
+    </ul>
+  </details>
+  <footer>Отметки хранятся в этом браузере. Данные актуальны на 13.10.2026.</footer>
+</div>
+
+<script>
+// r = порядок выхода, c = порядок хронологии, y = год выхода, ev = годы событий, p = фаза, kp = ID Кинопоиска
+const FILMS = [
+ {r:1, c:4,  p:1,y:2008,ev:"2010",     t:"Железный человек", en:"Iron Man", kp:61237},
+ {r:2, c:6,  p:1,y:2008,ev:"2011",     t:"Невероятный Халк", en:"The Incredible Hulk", kp:255380},
+ {r:3, c:5,  p:1,y:2010,ev:"2011",     t:"Железный человек 2", en:"Iron Man 2", kp:411924},
+ {r:4, c:7,  p:1,y:2011,ev:"2011",     t:"Тор", en:"Thor", kp:258941},
+ {r:5, c:1,  p:1,y:2011,ev:"1943–1945",t:"Первый мститель", en:"Captain America: The First Avenger", kp:160946},
+ {r:6, c:8,  p:1,y:2012,ev:"2012",     t:"Мстители", en:"The Avengers", kp:263531},
+ {r:7, c:9,  p:2,y:2013,ev:"2012",     t:"Железный человек 3", en:"Iron Man 3", kp:462762},
+ {r:8, c:10, p:2,y:2013,ev:"2013",     t:"Тор 2: Царство тьмы", en:"Thor: The Dark World", kp:595938},
+ {r:9, c:11, p:2,y:2014,ev:"2014",     t:"Первый мститель: Другая война", en:"Captain America: The Winter Soldier", kp:676266},
+ {r:10,c:12, p:2,y:2014,ev:"2014",     t:"Стражи Галактики", en:"Guardians of the Galaxy", kp:689066},
+ {r:11,c:14, p:2,y:2015,ev:"2015",     t:"Мстители: Эра Альтрона", en:"Avengers: Age of Ultron", kp:679830},
+ {r:12,c:15, p:2,y:2015,ev:"2015",     t:"Человек-муравей", en:"Ant-Man", kp:195496},
+ {r:13,c:16, p:3,y:2016,ev:"2016",     t:"Первый мститель: Противостояние", en:"Captain America: Civil War", kp:822708},
+ {r:14,c:20, p:3,y:2016,ev:"2016–2017",t:"Доктор Стрэндж", en:"Doctor Strange", kp:409600},
+ {r:15,c:13, p:3,y:2017,ev:"2014",     t:"Стражи Галактики. Часть 2", en:"Guardians of the Galaxy Vol. 2", kp:841263},
+ {r:16,c:19, p:3,y:2017,ev:"2016",     t:"Человек-паук: Возвращение домой", en:"Spider-Man: Homecoming", kp:690593},
+ {r:17,c:21, p:3,y:2017,ev:"2017",     t:"Тор: Рагнарёк", en:"Thor: Ragnarok", kp:822709},
+ {r:18,c:18, p:3,y:2018,ev:"2016",     t:"Чёрная Пантера", en:"Black Panther", kp:623250},
+ {r:19,c:23, p:3,y:2018,ev:"2018",     t:"Мстители: Война бесконечности", en:"Avengers: Infinity War", kp:843649},
+ {r:20,c:22, p:3,y:2018,ev:"2018",     t:"Человек-муравей и Оса", en:"Ant-Man and the Wasp", kp:935940},
+ {r:21,c:3,  p:3,y:2019,ev:"1995",     t:"Капитан Марвел", en:"Captain Marvel", kp:843859},
+ {r:22,c:24, p:3,y:2019,ev:"2018–2023",t:"Мстители: Финал", en:"Avengers: Endgame", kp:843650},
+ {r:23,c:27, p:3,y:2019,ev:"2024",     t:"Человек-паук: Вдали от дома", en:"Spider-Man: Far From Home", kp:1008445},
+ {r:24,c:17, p:4,y:2021,ev:"2016",     t:"Чёрная Вдова", en:"Black Widow", kp:823956},
+ {r:25,c:26, p:4,y:2021,ev:"2023–2024",t:"Шан-Чи и легенда десяти колец", en:"Shang-Chi and the Legend of the Ten Rings", kp:1219149},
+ {r:26,c:29, p:4,y:2021,ev:"2024",     t:"Вечные", en:"Eternals", kp:1198811},
+ {r:27,c:28, p:4,y:2021,ev:"2024",     t:"Человек-паук: Нет пути домой", en:"Spider-Man: No Way Home", kp:1309570},
+ {r:28,c:30, p:4,y:2022,ev:"2024",     t:"Доктор Стрэндж: В мультивселенной безумия", en:"Doctor Strange in the Multiverse of Madness", kp:1219909},
+ {r:29,c:32, p:4,y:2022,ev:"2025",     t:"Тор: Любовь и гром", en:"Thor: Love and Thunder", kp:1282688},
+ {r:30,c:31, p:4,y:2022,ev:"2025",     t:"Чёрная Пантера: Ваканда навеки", en:"Black Panther: Wakanda Forever", kp:1199773},
+ {r:31,c:33, p:5,y:2023,ev:"2025–2026",t:"Человек-муравей и Оса: Квантомания", en:"Ant-Man and the Wasp: Quantumania", kp:1318868},
+ {r:32,c:34, p:5,y:2023,ev:"2025–2026",t:"Стражи Галактики. Часть 3", en:"Guardians of the Galaxy Vol. 3", kp:1044280},
+ {r:33,c:35, p:5,y:2023,ev:"2025–2026",t:"Марвелы", en:"The Marvels", kp:1287544},
+ {r:34,c:25, p:5,y:2024,ev:"2024",     t:"Дэдпул и Росомаха", en:"Deadpool & Wolverine", kp:1008444},
+ {r:35,c:36, p:5,y:2025,ev:"2027",     t:"Капитан Америка: Новый мир", en:"Captain America: Brave New World", kp:4443920},
+ {r:36,c:37, p:5,y:2025,ev:"2027",     t:"Громовержцы*", en:"Thunderbolts*", kp:5001443},
+ {r:37,c:2,  p:6,y:2025,ev:"1960-е, другая вселенная",t:"Фантастическая четвёрка: Первые шаги", en:"The Fantastic Four: First Steps", kp:1287545},
+ {r:38,c:38, p:6,y:2026,ev:"2028",     t:"Человек-паук: Совершенно новый день", en:"Spider-Man: Brand New Day", kp:5494049},
+ {r:39,c:39, p:6,y:2026,ev:"—",        t:"Мстители: Судный день", en:"Avengers: Doomsday", kp:5060245, soon:"в кино 18.12.2026"},
+];
+
+const KEY="mcu-seen-v1", PREF="mcu-prefs-v1";
+const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}};
+const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+
+let seen=new Set(load(KEY,[]));
+let prefs=Object.assign({order:"release",phase:"all",show:"all",theme:null},load(PREF,{}));
+
+const $=s=>document.querySelector(s);
+const list=$("#list");
+
+function render(){
+  const key=prefs.order==="chrono"?"c":"r";
+  let items=[...FILMS].sort((a,b)=>a[key]-b[key]);
+  if(prefs.phase!=="all") items=items.filter(f=>String(f.p)===prefs.phase);
+  if(prefs.show==="seen") items=items.filter(f=>seen.has(f.en));
+  if(prefs.show==="todo") items=items.filter(f=>!seen.has(f.en));
+  list.innerHTML=items.length?items.map(f=>`
+    <li class="film${seen.has(f.en)?" seen":""}">
+      <span class="num">${f[key]}</span>
+      <input type="checkbox" class="cb" data-id="${f.en}" ${seen.has(f.en)?"checked":""} aria-label="Посмотрел: ${f.t}">
+      <div class="info">
+        <div class="t">${f.t}</div>
+        <div class="meta"><span>${f.en}</span><span class="tag">${f.y}</span><span class="tag">Фаза ${f.p}</span>${prefs.order==="chrono"?`<span class="tag">события: ${f.ev}</span>`:""}${f.soon?`<span class="tag soon">${f.soon}</span>`:""}</div>
+      </div>
+      <a class="kp" href="https://www.kinopoisk.ru/film/${f.kp}/" target="_blank" rel="noopener">Кинопоиск ↗</a>
+    </li>`).join(""):`<li class="empty">Здесь пусто</li>`;
+  document.querySelectorAll(".seg button").forEach(b=>b.classList.toggle("on",b.dataset.order===prefs.order));
+  $("#phase").value=prefs.phase; $("#show").value=prefs.show;
+  $("#chronoNote").hidden=prefs.order!=="chrono";
+  stats();
+}
+function stats(){
+  const total=FILMS.length, n=FILMS.filter(f=>seen.has(f.en)).length;
+  $("#count").innerHTML=`${n} <small>/ ${total} просмотрено</small>`;
+  $("#bar").style.width=(n/total*100)+"%";
+  $("#left").textContent=n===total?"Всё посмотрено 🎉":`Осталось ${total-n}`;
+}
+list.addEventListener("change",e=>{
+  if(!e.target.matches(".cb"))return;
+  const id=e.target.dataset.id;
+  e.target.checked?seen.add(id):seen.delete(id);
+  save(KEY,[...seen]);
+  e.target.closest("li").classList.toggle("seen",e.target.checked);
+  stats();
+  if(prefs.show!=="all") render();
+});
+document.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{prefs.order=b.dataset.order;save(PREF,prefs);render()});
+$("#phase").onchange=e=>{prefs.phase=e.target.value;save(PREF,prefs);render()};
+$("#show").onchange=e=>{prefs.show=e.target.value;save(PREF,prefs);render()};
+$("#reset").onclick=()=>{if(confirm("Снять все галочки?")){seen.clear();save(KEY,[]);render()}};
+function applyTheme(){prefs.theme?document.documentElement.dataset.theme=prefs.theme:document.documentElement.removeAttribute("data-theme")}
+$("#theme").onclick=()=>{
+  const dark=prefs.theme?prefs.theme==="dark":matchMedia("(prefers-color-scheme: dark)").matches;
+  prefs.theme=dark?"light":"dark";save(PREF,prefs);applyTheme();
+};
+applyTheme(); render();
+</script>
+</body>
+</html>
